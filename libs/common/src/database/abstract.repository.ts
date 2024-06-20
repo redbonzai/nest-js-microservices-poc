@@ -19,15 +19,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   }
 
   async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
-    const document = await this.model
-      .findOne(filterQuery)
-      .lean<TDocument>(true);
+    return await this.model.findOne(filterQuery).lean<TDocument>(true);
 
-    if (!document) {
-      this.logger.warn('Document not found with filterQuery', filterQuery);
-      throw new NotFoundException('Document was not found');
-    }
-    return document;
+    // if (!document) {
+    //   this.logger.warn('Document not found with filterQuery', filterQuery);
+    //   throw new NotFoundException('Document was not found');
+    // }
+    // return document;
   }
 
   async findOneAndUpdate(
@@ -48,12 +46,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     // return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  // async findOneAndDelete(
-  //   filterQuery: FilterQuery<TDocument>,
-  // ): Promise<TDocument> {
-  //   return this.model.findOneAndDelete(filterQuery).lean<TDocument>(true);
-  // }
-
   async findOneAndDelete(
     filterQuery: FilterQuery<TDocument>,
   ): Promise<TDocument> {
@@ -66,7 +58,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         'Attempted to delete a non-existent document with filterQuery',
         filterQuery,
       );
-      throw new NotFoundException('YER MOM was not found');
+      throw new NotFoundException('resource was not found');
     }
 
     return deletedDocument;

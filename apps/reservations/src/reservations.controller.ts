@@ -1,39 +1,41 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
-import { CreateReservationDto } from './dto';
-import { UpdateReservationDto } from './dto';
+import { CreateReservationDto, UpdateReservationDto } from './dto';
 import { JwtAuthGuard } from '@app/common/auth';
-import { CurrentUser, UserDto } from '@app/common';
+import { CurrentUser, Roles, UserDto } from '@app/common';
+import { UsersService } from 'apps/auth/src/users/users.service';
+import { ReservationDocument } from './models/reservation.schema';
 
 @Controller('reservations')
 export class ReservationsController {
-  constructor(private readonly reservationsService: ReservationsService) {}
+  constructor(
+    private readonly reservationsService: ReservationsService,
+    private readonly usersService: UsersService,
+  ) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @UseGuards(JwtAuthGuard)
+  @Roles('Admin')
   async create(
     @Body() createReservationDto: CreateReservationDto,
     @CurrentUser() user: UserDto,
-  ) {
-    const reservation = await this.reservationsService.create(
-      createReservationDto,
-      user,
-    );
-    console.log('USER RESERVATION CREATED: ', reservation);
-    return reservation;
+  ): Promise<ReservationDocument> {
+    console.log('REQUEST BODY FOR CREATED RESERVATION : ', user);
+    return await this.reservationsService.create(createReservationDto, user);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @Roles('Admin')
   async findAll() {
     return await this.reservationsService.findAll();
   }
@@ -46,6 +48,7 @@ export class ReservationsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @Roles('Admin')
   async update(
     @Param('id') id: string,
     @Body() updateReservationDto: UpdateReservationDto,
@@ -55,6 +58,7 @@ export class ReservationsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @Roles('Admin')
   async remove(@Param('id') id: string) {
     return await this.reservationsService.remove(id);
   }

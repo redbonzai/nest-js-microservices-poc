@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { UserDocument } from './users/models/user.schema';
+import { UserDocument } from '@app/common';
 import { TokenPayload } from './interfaces/token-payload.interface';
 
 @Injectable()
@@ -22,12 +22,7 @@ export class AuthService {
     );
 
     const token = this.jwtService.sign(tokenPayload);
-    // const token = this.jwtService.sign(tokenPayload, {
-    //   secret: this.configService.get('JWT_SECRET'),
-    //   expiresIn: this.configService.get('JWT_EXPIRATION'),
-    // });
-    //
-
+    console.log('TOKEN IN AUTH.SERVICE: ', token);
     response.cookie('Authentication', token, {
       httpOnly: true,
       expires,
@@ -36,7 +31,10 @@ export class AuthService {
     return token;
   }
 
-  getHello(): string {
-    return 'Hello World!';
+  async logout(response: Response): Promise<{ message: string }> {
+    response.clearCookie('Authentication');
+    return {
+      message: 'Authentication successfully cleared',
+    };
   }
 }

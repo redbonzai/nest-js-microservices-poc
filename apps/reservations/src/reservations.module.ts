@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import * as Joi from 'joi';
@@ -9,12 +10,15 @@ import {
   LoggerModule,
   AUTH_SERVICE,
   PAYMENTS_SERVICE,
+  ResponseInterceptor,
 } from '@app/common';
 import { ReservationsRepository } from './reservations.repository';
 import {
   ReservationDocument,
   ReservationSchema,
 } from './models/reservation.schema';
+import { UsersModule } from 'apps/auth/src/users/users.module';
+import { UsersRepository } from 'apps/auth/src/users/users.repository';
 
 @Module({
   imports: [
@@ -58,8 +62,17 @@ import {
         inject: [ConfigService],
       },
     ]),
+    UsersModule,
   ],
   controllers: [ReservationsController],
-  providers: [ReservationsService, ReservationsRepository],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+    ReservationsService,
+    ReservationsRepository,
+    UsersRepository,
+  ],
 })
 export class ReservationsModule {}
